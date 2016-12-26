@@ -77,4 +77,17 @@ NOTES:
    * if everything is working, you should have the file `us-east-1_aws_vpn.ovpn` in your current folder .
    * on Windows, DNS server resultion problem can be resolved by comment the `setenv opt block-outside-dns` out which might cause DNS leak.
 
+# Setup  on existing VPC instance install
+   * make sure the instance is started in AWS console
+   * make sure the VPC instance UDP port 1194 and TCP port 22 is open (configure via security group)
+   * (optional) you are able to login and test with the following command line 
+      1)  `ssh-agent bash `
+      2)  `ssh-add us-east-1.pem` 
+      3)  `ssh <ip address>`
+      4)  `exit` 
+   * `bash setupvpn -i <ip address>` -- generate the aws_vpn.ovpn
+
    
+
+
+

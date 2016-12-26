@@ -1,0 +1,46 @@
+#!/bin/bash
+
+
+#Function for error handling
+bail ()
+{
+	echo -e "${red}Error code $1"
+	exit 
+}
+
+#SSH
+sshcmd() {
+  ssh "${scp_options[@]}" -t -t $@
+}
+
+#SCP
+scpcmd() {
+    echo $@
+  scp "${scp_options[@]}" $@
+}
+
+remote_script="\$HOME/openvpn-autoinstall.sh"
+local_script="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/scripts/openvpn-autoinstall.sh"
+run_script="sudo bash ./openvpn-autoinstall.sh"
+remote_path="\$HOME/aws_vpn.ovpn"
+local_path="$(pwd)/caws_vpn.ovpn"
+
+user='ubuntu'
+
+white='\033[01;37m'
+green='\033[00;32m'
+
+while getopts ":i:" opt; do 
+  case $opt in
+    i) rflag="defined"; instance_ip="$OPTARG" ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2; bail 1
+      ;;
+  esac
+done
+
+echo -e "${white}Setting up VPN on $instance_ip"
+scpcmd "$local_script" $user@$instance_ip:"$remote_script" || bail 5
+sshcmd "$user"@$instance_ip "chmod +x $remote_script && $run_script" || bail 6
+scpcmd $user@$instance_ip:"$remote_path" "$local_path" || bail 7
+echo -e "${green}OpenVPN config file is located at $(pwd)"
